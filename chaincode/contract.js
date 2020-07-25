@@ -18,12 +18,12 @@ class PharmaContract extends Contract {
 	}
 
 	/**
-		 * Create a new user account on the network
+		 * Create a new company account on the network
 		 * @param ctx - The transaction context object
-		 * @param name - Name of the user
-		 * @param email - Email ID of the user
-		 * @param phone_no - phone_no of the user
-		 * @param aadhar_no - aadhar_no of the user
+		 * @param companyCRN - CRN of the Company
+		 * @param companyName - Name of the company
+		 * @param location - location of the company
+		 * @param organisationRole - ROle of the company
 		 * @returns
 		 */
 		async registerCompany(ctx, companyCRN, companyName, location, organisationRole) {
@@ -63,23 +63,24 @@ class PharmaContract extends Contract {
 				// Convert the JSON object to a buffer and send it to blockchain for storage
 				let dataBuffer = Buffer.from(JSON.stringify(newRequestObject));
 				await ctx.stub.putState(requestKey, dataBuffer);
-				// Return value of new student account created to user
+				// Return value of new company account created to user
 				return newRequestObject;
 
 
 		}
 
 		/**
-			 * Create a new user account on the network
+			 * Create a new drug on the network
 			 * @param ctx - The transaction context object
-			 * @param name - Name of the user
-			 * @param email - Email ID of the user
-			 * @param phone_no - phone_no of the user
-			 * @param aadhar_no - aadhar_no of the user
+			 * @param drugName - Name of the drug
+			 * @param serialNo - Serial no of the drug
+			 * @param mfgDate - mfgDate of the durg
+			 * @param expDate - expDate of the drug
+			 * @param companyCRN - companyCRN of the drug
 			 * @returns
 			 */
 			async addDrug(ctx,drugName, serialNo,mfgDate, expDate, companyCRN) {
-				// Create a new composite key for the new company account
+				// Create a new composite key for the new drug
 
 			let companyObject=await this.getCompanyObject(ctx,companyCRN);
 
@@ -114,6 +115,13 @@ class PharmaContract extends Contract {
 
 			}
 
+			/**
+				 * Get getStateByPartialCompositeKey
+				 * @param ctx - The transaction context object
+				 * @param companyCRN - companyCRN of the drug
+				 * @returns
+				 */
+
 		async	getCompanyObject(ctx,companyCRN) {
 
 	// Return value of property from blockchain
@@ -137,6 +145,16 @@ class PharmaContract extends Contract {
 	let companyObject =  JSON.parse(companyBuffer.toString());
 	     return companyObject;
 	}
+
+	/**
+		 * Create a new PO
+		 * @param ctx - The transaction context object
+		 * @param buyerCRN - CRN of buyer company
+		 * @param sellerCRN - CRN of seller company
+		 * @param drugName - name of the drug
+		 * @param quantity - quantity of the drug
+		 * @returns
+		 */
 
 	async createPO (ctx,buyerCRN, sellerCRN, drugName, quantity){
 
@@ -177,7 +195,7 @@ let orderObject = {
 	}
 
 	async createShipment (ctx, buyerCRN, drugName, listOfAssets, transporterCRN)
-{
+	{
 
 let buyerObject1=await this.getCompanyObject(ctx,buyerCRN);
 var assets=listOfAssets.split(",");
@@ -265,7 +283,7 @@ async updateShipment(ctx, buyerCRN, drugName, transporterCRN)
 {
 let buyerObject1=await this.getCompanyObject(ctx,buyerCRN);
 
-	if(ctx.clientIdentity.getMSPID()=="transporterMSP")
+	if(ctx.clientIdentity.getMSPID()!=="transporterMSP")
 	{
 		throw new Error("Only Transporter can initiate this function"+ ctx.clientIdentity.getMSPID());
 	}
@@ -325,7 +343,7 @@ updatedAt: new Date(),
 
 	await ctx.stub.putState(shipmentKey, shipmentBuffer1);
 
-// Return value of new company
+// Return value of updated shipment
  return shipmentObject;
 
 }
